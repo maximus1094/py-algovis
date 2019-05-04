@@ -10,16 +10,25 @@ m_dheight = 600
 m_display = pygame.display.set_mode((m_dwidth, m_dheight))
 
 # Tile types
-
+T_NORMAL = 0
+T_BLOCKED = 1
+T_START = 2
+T_END = 3
 
 # Colours
 c_white = pygame.Color(255, 255, 255)
+
 c_black = pygame.Color(0, 0, 0)
 c_red = pygame.Color(255, 0, 0)
+c_green = pygame.Color(0, 255, 0)
+c_blue = pygame.Color(0, 0, 255)
+
 
 tile_colors = {
-    0: c_black,
-    1: c_red
+    T_NORMAL: c_black,
+    T_BLOCKED: c_blue,
+    T_START: c_green,
+    T_END: c_red
 }
 
 # Objects (Move to a better place later)
@@ -67,6 +76,9 @@ m_fps = 30
 m_clock = pygame.time.Clock()
 m_quit = False
 
+start_tile_placed = False
+end_tile_placed = False
+
 while not m_quit:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -83,7 +95,16 @@ while not m_quit:
                 tile_x_index = math.floor((mouse_x - field_start_x) / tile_width)
                 tile_y_index = math.floor((mouse_y - field_start_y) / tile_height)
 
-                convert_tile(tile_x_index, tile_y_index, 1)
+                # Setting up field before search begins
+                tile_type = T_BLOCKED
+                if not start_tile_placed:
+                    tile_type = T_START
+                    start_tile_placed = True
+                elif not end_tile_placed:
+                    tile_type = T_END
+                    end_tile_placed = True
+
+                convert_tile(tile_x_index, tile_y_index, tile_type)
             else:
                 # Check for button clicks etc.
                 print('Clicked outside the field!')
