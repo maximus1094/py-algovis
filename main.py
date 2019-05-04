@@ -12,22 +12,17 @@ m_display = pygame.display.set_mode((m_dwidth, m_dheight))
 # Tile types
 T_EMPTY = 0
 T_BLOCKED = 1
-T_START = 2
+T_SEARCH = 2
 T_END = 3
 
 # Colors
 c_white = pygame.Color(255, 255, 255)
 
-c_black = pygame.Color(0, 0, 0)
-c_red = pygame.Color(255, 0, 0)
-c_green = pygame.Color(0, 255, 0)
-c_blue = pygame.Color(0, 0, 255)
-
 tile_colors = {
-    T_EMPTY: c_black,
-    T_BLOCKED: c_blue,
-    T_START: c_green,
-    T_END: c_red
+    T_EMPTY: pygame.Color(204, 201, 220), # Bright grey ccc9dc
+    T_BLOCKED: pygame.Color(68, 68, 68), # Dark grey 434440
+    T_SEARCH: pygame.Color(74, 25, 66), # Purple 4a1942
+    T_END: pygame.Color(199, 239, 0) # Bright yellow c7ef00
 }
 
 # Objects (Move to a better place later)
@@ -73,7 +68,7 @@ def mouse_pos_to_field_index(mouse_x, mouse_y):
 
     return (tile_x_index, tile_y_index)
 
-def tile_click_logic(x, y, new_type):
+def change_tile(x, y, new_type):
     # Only empty tiles are allowed to be converted
     if field[y][x] == T_EMPTY:
         field[y][x] = new_type
@@ -107,14 +102,14 @@ while not m_quit:
                 tile_type = T_EMPTY
                 if not start_tile_placed:
                     placing_tile = True
-                    tile_type = T_START
+                    tile_type = T_SEARCH
                     start_tile_placed = True
                 elif not end_tile_placed:
                     placing_tile = True
                     tile_type = T_END
                     end_tile_placed = True
 
-                tile_click_logic(tile_x_index, tile_y_index, tile_type)
+                change_tile(tile_x_index, tile_y_index, tile_type)
             else:
                 # Check for button clicks etc.
                 print('Clicked outside the field!')
@@ -128,7 +123,7 @@ while not m_quit:
             tile_x_index, tile_y_index = mouse_pos_to_field_index(mouse_x, mouse_y)
             
             if start_tile_placed and end_tile_placed:
-                tile_click_logic(tile_x_index, tile_y_index, T_BLOCKED)
+                change_tile(tile_x_index, tile_y_index, T_BLOCKED)
 
     # Clear display
     m_display.fill(c_white)
