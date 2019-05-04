@@ -10,12 +10,12 @@ m_dheight = 600
 m_display = pygame.display.set_mode((m_dwidth, m_dheight))
 
 # Tile types
-T_NORMAL = 0
+T_EMPTY = 0
 T_BLOCKED = 1
 T_START = 2
 T_END = 3
 
-# Colours
+# Colors
 c_white = pygame.Color(255, 255, 255)
 
 c_black = pygame.Color(0, 0, 0)
@@ -23,9 +23,8 @@ c_red = pygame.Color(255, 0, 0)
 c_green = pygame.Color(0, 255, 0)
 c_blue = pygame.Color(0, 0, 255)
 
-
 tile_colors = {
-    T_NORMAL: c_black,
+    T_EMPTY: c_black,
     T_BLOCKED: c_blue,
     T_START: c_green,
     T_END: c_red
@@ -68,8 +67,16 @@ def draw_field():
         tile_offset_x = 0
         tile_offset_y += tile_height
 
-def convert_tile(x, y, new_type):
-    field[y][x] = new_type
+def mouse_pos_to_field_index(mouse_x, mouse_y):
+    tile_x_index = math.floor((mouse_x - field_start_x) / tile_width)
+    tile_y_index = math.floor((mouse_y - field_start_y) / tile_height)
+
+    return (tile_x_index, tile_y_index)
+
+def tile_click_logic(x, y, new_type):
+    # Only empty tiles are allowed to be converted
+    if field[y][x] == T_EMPTY:
+        field[y][x] = new_type
 
 # Main loop
 m_fps = 30
@@ -78,11 +85,13 @@ m_quit = False
 
 start_tile_placed = False
 end_tile_placed = False
+placing_tile = False
 
 while not m_quit:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             m_quit = True
+            break
         
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -92,22 +101,34 @@ while not m_quit:
                 and mouse_y >= field_start_y and mouse_y <= field_start_y + field_height):
                 
                 # Get clicked tile
-                tile_x_index = math.floor((mouse_x - field_start_x) / tile_width)
-                tile_y_index = math.floor((mouse_y - field_start_y) / tile_height)
+                tile_x_index, tile_y_index = mouse_pos_to_field_index(mouse_x, mouse_y)
 
                 # Setting up field before search begins
-                tile_type = T_BLOCKED
+                tile_type = T_EMPTY
                 if not start_tile_placed:
+                    placing_tile = True
                     tile_type = T_START
                     start_tile_placed = True
                 elif not end_tile_placed:
+                    placing_tile = True
                     tile_type = T_END
                     end_tile_placed = True
 
-                convert_tile(tile_x_index, tile_y_index, tile_type)
+                tile_click_logic(tile_x_index, tile_y_index, tile_type)
             else:
                 # Check for button clicks etc.
                 print('Clicked outside the field!')
+
+        elif event.type == pygame.MOUSEBUTTONUP:
+            placing_tile = False
+
+        if pygame.mouse.get_pressed()[0] and not placing_tile:
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            
+            tile_x_index, tile_y_index = mouse_pos_to_field_index(mouse_x, mouse_y)
+            
+            if start_tile_placed and end_tile_placed:
+                tile_click_logic(tile_x_index, tile_y_index, T_BLOCKED)
 
     # Clear display
     m_display.fill(c_white)
