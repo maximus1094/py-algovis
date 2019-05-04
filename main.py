@@ -1,4 +1,5 @@
 import pygame
+import math
 
 # Start
 pygame.init()
@@ -64,8 +65,13 @@ while not m_quit:
             if (mouse_x >= field_start_x and mouse_x <= field_start_x + field_width
                 and mouse_y >= field_start_y and mouse_y <= field_start_y + field_height):
                 
-                print('Clicked on the field!')
+                # Get clicked tile
+                tile_x_index = math.floor((mouse_x - field_start_x) / tile_width)
+                tile_y_index = math.floor((mouse_y - field_start_y) / tile_height)
+
+                print(f'Tile index: {tile_x_index, tile_y_index}')
             else:
+                # Check for button clicks etc.
                 print('Clicked outside the field!')
 
     # Clear display
