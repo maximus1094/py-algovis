@@ -9,16 +9,24 @@ m_dwidth = 600
 m_dheight = 600
 m_display = pygame.display.set_mode((m_dwidth, m_dheight))
 
+# Tile types
+
+
 # Colours
 c_white = pygame.Color(255, 255, 255)
 c_black = pygame.Color(0, 0, 0)
+c_red = pygame.Color(255, 0, 0)
+
+tile_colors = {
+    0: c_black,
+    1: c_red
+}
 
 # Objects (Move to a better place later)
 # Field = 40 * 40 tiles
 # Tile Codes
 # 0 = regular unused tile
-field = [0] * 40
-field = [field] * 40
+field = [[0] * 40 for _ in range(40)]
 
 tile_width = 10
 tile_height = 10
@@ -37,16 +45,22 @@ def draw_field():
     tile_offset_x = 0
     tile_offset_y = 0
 
-    for yline in field:
-        for x in yline:
-            tile = [field_start_x + tile_offset_x, field_start_y + tile_offset_y, tile_width-tile_padding_x, tile_height-tile_padding_y]
+    y_range = range(len(field))
+    x_range = range(len(field[0]))
+    for y in y_range:
+        for x in x_range:
+            tile_rect = [field_start_x + tile_offset_x, field_start_y + tile_offset_y, tile_width-tile_padding_x, tile_height-tile_padding_y]
             
-            pygame.draw.rect(m_display, c_black, tile)
+            tile_color = tile_colors[field[y][x]]
+            pygame.draw.rect(m_display, tile_color, tile_rect)
 
             tile_offset_x += tile_width
 
         tile_offset_x = 0
         tile_offset_y += tile_height
+
+def convert_tile(x, y, new_type):
+    field[y][x] = new_type
 
 # Main loop
 m_fps = 30
@@ -69,7 +83,7 @@ while not m_quit:
                 tile_x_index = math.floor((mouse_x - field_start_x) / tile_width)
                 tile_y_index = math.floor((mouse_y - field_start_y) / tile_height)
 
-                print(f'Tile index: {tile_x_index, tile_y_index}')
+                convert_tile(tile_x_index, tile_y_index, 1)
             else:
                 # Check for button clicks etc.
                 print('Clicked outside the field!')
