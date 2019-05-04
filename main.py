@@ -17,13 +17,16 @@ T_END = 3
 
 # Colors
 c_white = pygame.Color(255, 255, 255)
+c_black = pygame.Color(0, 0, 0)
 
 tile_colors = {
     T_EMPTY: pygame.Color(204, 201, 220), # Bright grey ccc9dc
-    T_BLOCKED: pygame.Color(68, 68, 68), # Dark grey 434440
-    T_SEARCH: pygame.Color(74, 25, 66), # Purple 4a1942
-    T_END: pygame.Color(199, 239, 0) # Bright yellow c7ef00
+    T_BLOCKED: pygame.Color(74, 25, 66), # Purple 4a1942
+    T_SEARCH: pygame.Color(199, 239, 0), # Bright yellow c7ef00
+    T_END: pygame.Color(68, 68, 68) # Dark grey 434440 
 }
+
+font = pygame.font.SysFont(None, 22)
 
 # Objects (Move to a better place later)
 # Field = 40 * 40 tiles
@@ -72,6 +75,10 @@ def change_tile(x, y, new_type):
     # Only empty tiles are allowed to be converted
     if field[y][x] == T_EMPTY:
         field[y][x] = new_type
+
+def draw_text(text, position, color):
+    text_on_screen = font.render(text, True, color)
+    m_display.blit(text_on_screen, position)
 
 # Main loop
 m_fps = 30
@@ -130,6 +137,13 @@ while not m_quit:
 
     # Draw on display
     draw_field()
+
+    if not start_tile_placed:
+        draw_text('Click to place starting point.', [field_start_x, field_start_y * (3/4)], c_black)
+    elif not end_tile_placed:
+        draw_text('Click to place end point.', [field_start_x, field_start_y * (3/4)], c_black)
+    else:
+        draw_text('Drag to place barriers.', [field_start_x, field_start_y * (3/4)], c_black)
 
     # Update display
     pygame.display.update()
