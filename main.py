@@ -1,6 +1,8 @@
 import pygame
 import math
 
+from a_star_pathfinding import *
+
 # Start
 pygame.init()
 pygame.display.set_caption('Application Title')
@@ -65,6 +67,10 @@ def draw_field():
         tile_offset_x = 0
         tile_offset_y += tile_height
 
+def print_field():
+    for line in field:
+        print(line)
+
 def mouse_pos_to_field_index(mouse_x, mouse_y):
     tile_x_index = math.floor((mouse_x - field_start_x) / tile_width)
     tile_y_index = math.floor((mouse_y - field_start_y) / tile_height)
@@ -94,6 +100,12 @@ while not m_quit:
         if event.type == pygame.QUIT:
             m_quit = True
             break
+
+        # For the moment, using keys to start A STAR ALGO
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_s:
+                astar_array = init_astar_array(field)
+                print_astar(astar_array)
         
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -126,11 +138,15 @@ while not m_quit:
 
         if pygame.mouse.get_pressed()[0] and not placing_tile:
             mouse_x, mouse_y = pygame.mouse.get_pos()
+
+            # Check if within field bounds            
+            if (mouse_x >= field_start_x and mouse_x <= field_start_x + field_width
+                and mouse_y >= field_start_y and mouse_y <= field_start_y + field_height):
             
-            tile_x_index, tile_y_index = mouse_pos_to_field_index(mouse_x, mouse_y)
-            
-            if start_tile_placed and end_tile_placed:
-                change_tile(tile_x_index, tile_y_index, T_BLOCKED)
+                tile_x_index, tile_y_index = mouse_pos_to_field_index(mouse_x, mouse_y)
+                
+                if start_tile_placed and end_tile_placed:
+                    change_tile(tile_x_index, tile_y_index, T_BLOCKED)
 
     # Clear display
     m_display.fill(c_white)
