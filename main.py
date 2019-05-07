@@ -95,6 +95,7 @@ start_tile_placed = False
 end_tile_placed = False
 end_tile_pos = None
 placing_tile = False
+placement_mode = True # If False, tiles cannot be placed
 
 astar_array = None
 
@@ -106,7 +107,9 @@ while not m_quit:
 
         # For the moment, using keys to start A STAR ALGO
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_s:
+            if event.key == pygame.K_m:
+                placement_mode = False
+
                 astar_array = init_astar_array(field, end_tile_pos)
                 
                 print('A STAR array generated.')
@@ -121,25 +124,27 @@ while not m_quit:
                 # Get clicked tile
                 tile_x_index, tile_y_index = mouse_pos_to_field_index(mouse_x, mouse_y)
 
-                # Setting up field before search begins
-                tile_type = T_EMPTY
-                if not start_tile_placed:
-                    placing_tile = True
-                    tile_type = T_SEARCH
-                    start_tile_placed = True
-                elif not end_tile_placed:
-                    placing_tile = True
-                    tile_type = T_END
-                    end_tile_placed = True
+                if placement_mode:
+                    # Setting up field before search begins
+                    tile_type = T_EMPTY
+                    if not start_tile_placed:
+                        placing_tile = True
+                        tile_type = T_SEARCH
+                        start_tile_placed = True
+                    elif not end_tile_placed:
+                        placing_tile = True
+                        tile_type = T_END
+                        end_tile_placed = True
 
-                    end_tile_pos = (tile_x_index, tile_y_index)
+                        end_tile_pos = (tile_x_index, tile_y_index)
+                    
+                    change_tile(tile_x_index, tile_y_index, tile_type)
                 else:
+                    # Doing something with tiles after they have been setup
                     # Just for testing
-                    if astar_array:
-                        node = astar_array[tile_y_index][tile_x_index]
-                        print(f'Tile H cost: {node.h_cost}')
+                    node = astar_array[tile_y_index][tile_x_index]
+                    print(f'Tile H cost: {node.h_cost}')
 
-                change_tile(tile_x_index, tile_y_index, tile_type)
             else:
                 # Check for button clicks etc.
                 print('Clicked outside the field!')

@@ -21,10 +21,10 @@ T_SEARCH = 2
 T_END = 3
 
 class Node:
-    def __init__(self, g_cost, h_cost, node_type):
-        self.g_cost = g_cost
+    def __init__(self, h_cost, node_type):
         self.h_cost = h_cost
-        self.f_cost = g_cost + h_cost
+        self.g_cost = None
+        self.f_cost = None
         self.node_type = node_type
         self.parent_node = None
 
@@ -54,17 +54,25 @@ def init_astar_array(array, endtile_pos=None):
     for y in range(arr_size):
         astar_yline = []
         for x in range(arr_size):
-            g_cost = 0
             h_cost = abs(end_x - x) + abs(end_y - y)
             node_type = array[y][x]
 
-            new_node = Node(g_cost=g_cost, h_cost=h_cost, node_type=node_type)
+            new_node = Node(h_cost=h_cost, node_type=node_type)
 
             astar_yline.append(new_node)
             
         astar_array.append(astar_yline)
 
     return astar_array
+
+"""
+This method finds the shortest path from start to end node.
+
+Every computational step taken by this function will be reflected on the field array,
+hence displayed on the screen.
+"""
+def astar_algorithm(arr_astar, arr_field):
+    pass
 
 def print_astar(arr):
     for yline in arr:
