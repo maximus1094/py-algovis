@@ -93,7 +93,10 @@ m_quit = False
 
 start_tile_placed = False
 end_tile_placed = False
+end_tile_pos = None
 placing_tile = False
+
+astar_array = None
 
 while not m_quit:
     for event in pygame.event.get():
@@ -104,8 +107,9 @@ while not m_quit:
         # For the moment, using keys to start A STAR ALGO
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_s:
-                astar_array = init_astar_array(field)
-                print_astar(astar_array)
+                astar_array = init_astar_array(field, end_tile_pos)
+                
+                print('A STAR array generated.')
         
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -127,6 +131,13 @@ while not m_quit:
                     placing_tile = True
                     tile_type = T_END
                     end_tile_placed = True
+
+                    end_tile_pos = (tile_x_index, tile_y_index)
+                else:
+                    # Just for testing
+                    if astar_array:
+                        node = astar_array[tile_y_index][tile_x_index]
+                        print(f'Tile H cost: {node.h_cost}')
 
                 change_tile(tile_x_index, tile_y_index, tile_type)
             else:

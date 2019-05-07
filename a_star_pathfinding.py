@@ -41,8 +41,12 @@ def get_endtile_pos(arr):
 """
 Takes a 2d array of ints and converts it to a 2d array of Nodes
 """
-def init_astar_array(array):
-    end_x, end_y = get_endtile_pos(array)
+def init_astar_array(array, endtile_pos=None):
+    if not endtile_pos:
+        endtile_pos = get_endtile_pos(array)
+
+    end_x = endtile_pos[0]
+    end_y = endtile_pos[1]
 
     arr_size = len(array[0])
 
@@ -51,7 +55,7 @@ def init_astar_array(array):
         astar_yline = []
         for x in range(arr_size):
             g_cost = 0
-            h_cost = 0 # Need to know the location of end node to compute
+            h_cost = abs(end_x - x) + abs(end_y - y)
             node_type = array[y][x]
 
             new_node = Node(g_cost=g_cost, h_cost=h_cost, node_type=node_type)
