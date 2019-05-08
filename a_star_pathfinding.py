@@ -14,6 +14,8 @@ system where it will be used. ie. to the main.py.
 eg. Node.node_type must be one of the tile types in main.py.
 """
 
+import time
+
 # Tile types
 T_EMPTY = 0
 T_BLOCKED = 1
@@ -128,6 +130,7 @@ def astar_algorithm(arr_astar, arr_field, start_tile_pos):
 
         if current_node.node_type == T_END:
             end_node_found = True
+
             return current_node
 
         # Examine neighbours of current node
@@ -151,10 +154,24 @@ def astar_algorithm(arr_astar, arr_field, start_tile_pos):
                 n_node.parent_node = current_node
 
                 if not n_node in open_list:
+                    arr_field[n_y][n_x] = T_SEARCH
+                    n_node.x_pos = n_x
+                    n_node.y_pos = n_y
                     open_list.append(n_node)
+
+        time.sleep(0.005)
 
         if len(open_list) == 0:
             return None
+
+def a_star_search(arr_field, start_tile_pos, end_tile_pos):
+    astar_array = init_astar_array(arr_field, end_tile_pos)
+
+    end_node = astar_algorithm(astar_array, arr_field, start_tile_pos)
+
+    print(end_node)
+
+    return end_node
 
 def print_astar(arr):
     for yline in arr:

@@ -1,5 +1,6 @@
 import pygame
 import math
+import _thread
 
 from a_star_pathfinding import *
 
@@ -86,6 +87,12 @@ def draw_text(text, position, color):
     text_on_screen = font.render(text, True, color)
     m_display.blit(text_on_screen, position)
 
+def run_search(field, start_tile_pos, end_tile_pos):
+    try:
+        _thread.start_new_thread( a_star_search, (field, start_tile_pos, end_tile_pos) )
+    except:
+        print("Error: unable to start thread")
+
 # Main loop
 m_fps = 30
 m_clock = pygame.time.Clock()
@@ -111,12 +118,7 @@ while not m_quit:
             if event.key == pygame.K_m:
                 placement_mode = False
 
-                astar_array = init_astar_array(field, end_tile_pos)
-                
-                print('A STAR array generated.')
-
-                end_node = astar_algorithm(astar_array, field, start_tile_pos)
-                print(end_node.x_pos, end_node.y_pos)
+                run_search(field, start_tile_pos, end_tile_pos)
         
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x, mouse_y = pygame.mouse.get_pos()
