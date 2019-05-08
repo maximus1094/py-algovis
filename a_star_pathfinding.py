@@ -16,16 +16,24 @@ eg. Node.node_type must be one of the tile types in main.py.
 
 import time
 
-# Tile types
+# TILE TYPES
 T_EMPTY = 0
 T_BLOCKED = 1
 T_SEARCH = 2
 T_END = 3
 
 # MOVEMENT TYPES
-M_STRAIGHT = 0
-M_DIAGONAL = 1
+M_STRAIGHT = 10
+M_DIAGONAL = 14
 
+"""
+Nodes are units on which A star search algorithm operates.
+
+Performing the search simply on a 2D array is not possible, 
+as additional information about each tile is needed.
+Therefore, before starting the search, 2D arrays of integers are converted to
+2D arrays on Nodes.
+"""
 class Node:
     def __init__(self, x_pos, y_pos, h_cost, node_type):
         self.x_pos = x_pos
@@ -39,6 +47,12 @@ class Node:
     def calc_f_cost(self):
         self.f_cost = self.h_cost + self.g_cost
 
+"""
+Position of object that we are searching for is used to calculate the H-COST.
+
+If end position is not provided, this function can be used to calculate it,
+as long as the tile is marked with the appropriate value.
+"""
 def get_endtile_pos(arr):
     arr_size = len(arr[0])
 
@@ -50,23 +64,24 @@ def get_endtile_pos(arr):
     return None
 
 """
-Takes a 2d array of ints and converts it to a 2d array of Nodes
+Takes a 2D array of ints and converts it to a 2D array of Nodes.
 """
-def init_astar_array(array, endtile_pos=None):
+def init_astar_array(tile_array, endtile_pos=None):
     if not endtile_pos:
-        endtile_pos = get_endtile_pos(array)
+        endtile_pos = get_endtile_pos(tile_array)
 
     end_x = endtile_pos[0]
     end_y = endtile_pos[1]
 
-    arr_size = len(array[0])
+    arr_size = len(tile_array[0])
 
     astar_array = []
     for y in range(arr_size):
         astar_yline = []
         for x in range(arr_size):
+            # Manhattan distance
             h_cost = abs(end_x - x) + abs(end_y - y)
-            node_type = array[y][x]
+            node_type = tile_array[y][x]
 
             new_node = Node(x_pos=x, y_pos=y, h_cost=h_cost, node_type=node_type)
 
@@ -76,7 +91,7 @@ def init_astar_array(array, endtile_pos=None):
 
     return astar_array
 
-def get_neighbour_positions(x_pos, y_pos, field_size):
+def get_neighbour_positions(x_pos, y_pos, max_index):
     neighbour_positions = []
 
     for y in range(-1, 2):
@@ -84,15 +99,16 @@ def get_neighbour_positions(x_pos, y_pos, field_size):
             new_x = x_pos + x
             new_y = y_pos + y
 
-            if (new_x >= 0 and new_x <= field_size-1
-                and new_y >= 0 and new_y <= field_size-1):
+            if (new_x >= 0 and new_x <= max_index
+                and new_y >= 0 and new_y <= max_index):
                 
-                move_type = M_DIAGONAL
+                move_cost = M_DIAGONAL
                 if y == 0 or x == 0:
-                    move_type = M_STRAIGHT
+                    move_cost = M_STRAIGHT
 
-                neighbour_positions.append((new_x, new_y, move_type))
+                neighbour_positions.append((new_x, new_y, move_cost))
     
+    # Remove current tile itself
     neighbour_positions.remove((x_pos, y_pos, M_STRAIGHT))
 
     return neighbour_positions
@@ -100,11 +116,11 @@ def get_neighbour_positions(x_pos, y_pos, field_size):
 """
 This method finds the shortest path from start to end node.
 
-Every computational step taken by this function will be reflected on the field array,
+Every computational step taken by this function will be reflected on the tile array,
 hence displayed on the screen.
 """
-def astar_algorithm(arr_astar, arr_field, start_tile_pos):
-    arr_size = len(arr_field[0])
+def astar_algorithm(astar_array, tile_array, start_tile_pos):
+    array_size = len(tile_array[0])
 
     open_list = []
     closed_list = []
@@ -112,7 +128,7 @@ def astar_algorithm(arr_astar, arr_field, start_tile_pos):
     start_tile_x = start_tile_pos[0]
     start_tile_y = start_tile_pos[1]
 
-    start_node = arr_astar[start_tile_y][start_tile_x]
+    start_node = astar_array[start_tile_y][start_tile_x]
     start_node.g_cost = 0
     start_node.calc_f_cost()
 
@@ -134,19 +150,15 @@ def astar_algorithm(arr_astar, arr_field, start_tile_pos):
             return current_node
 
         # Examine neighbours of current node
-        neighbours = get_neighbour_positions(current_node.x_pos, current_node.y_pos, arr_size)
-        for n_x, n_y, move_type in neighbours:
-            n_node = arr_astar[n_y][n_x]
+        neighbours = get_neighbour_positions(current_node.x_pos, current_node.y_pos, array_size-1)
+        for n_x, n_y, move_cost in neighbours:
+            n_node = astar_array[n_y][n_x]
 
             if n_node.node_type == T_BLOCKED or n_node in closed_list:
                 continue
             
             # Cost of path to neighbour
-            new_n_g_cost = current_node.g_cost
-            if move_type == M_DIAGONAL:
-                new_n_g_cost += 14
-            else:
-                new_n_g_cost += 10
+            new_n_g_cost = current_node.g_cost + move_cost
 
             if not n_node in open_list or new_n_g_cost < n_node.g_cost:
                 n_node.g_cost = new_n_g_cost
@@ -154,9 +166,7 @@ def astar_algorithm(arr_astar, arr_field, start_tile_pos):
                 n_node.parent_node = current_node
 
                 if not n_node in open_list:
-                    arr_field[n_y][n_x] = T_SEARCH
-                    n_node.x_pos = n_x
-                    n_node.y_pos = n_y
+                    tile_array[n_y][n_x] = T_SEARCH
                     open_list.append(n_node)
 
         time.sleep(0.005)
@@ -164,17 +174,16 @@ def astar_algorithm(arr_astar, arr_field, start_tile_pos):
         if len(open_list) == 0:
             return None
 
-def a_star_search(arr_field, start_tile_pos, end_tile_pos):
-    astar_array = init_astar_array(arr_field, end_tile_pos)
+"""
+After finding the end node, this method is used to backtrack the shortest path
+to the start node.
+"""
+def backtrack_path():
+    pass
 
-    end_node = astar_algorithm(astar_array, arr_field, start_tile_pos)
+def a_star_search(tile_array, start_tile_pos, end_tile_pos):
+    astar_array = init_astar_array(tile_array, end_tile_pos)
 
-    print(end_node)
+    end_node = astar_algorithm(astar_array, tile_array, start_tile_pos)
 
     return end_node
-
-def print_astar(arr):
-    for yline in arr:
-        arrconv = [x.node_type for x in yline]
-
-        print(arrconv)
