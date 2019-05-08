@@ -92,6 +92,7 @@ m_clock = pygame.time.Clock()
 m_quit = False
 
 start_tile_placed = False
+start_tile_pos = None
 end_tile_placed = False
 end_tile_pos = None
 placing_tile = False
@@ -113,6 +114,9 @@ while not m_quit:
                 astar_array = init_astar_array(field, end_tile_pos)
                 
                 print('A STAR array generated.')
+
+                end_node = astar_algorithm(astar_array, field, start_tile_pos)
+                print(end_node.x_pos, end_node.y_pos)
         
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -131,6 +135,8 @@ while not m_quit:
                         placing_tile = True
                         tile_type = T_SEARCH
                         start_tile_placed = True
+
+                        start_tile_pos = (tile_x_index, tile_y_index)
                     elif not end_tile_placed:
                         placing_tile = True
                         tile_type = T_END
@@ -144,6 +150,9 @@ while not m_quit:
                     # Just for testing
                     node = astar_array[tile_y_index][tile_x_index]
                     print(f'Tile H cost: {node.h_cost}')
+
+                    npos = get_neighbour_positions(tile_x_index, tile_y_index, 40)
+                    print(npos)
 
             else:
                 # Check for button clicks etc.
