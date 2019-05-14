@@ -15,6 +15,7 @@ eg. Node.node_type must be one of the tile types in main.py.
 """
 
 import time
+import _thread
 
 # TILE TYPES
 T_EMPTY = 0
@@ -178,12 +179,26 @@ def astar_algorithm(astar_array, tile_array, start_tile_pos):
 After finding the end node, this method is used to backtrack the shortest path
 to the start node.
 """
-def backtrack_path():
-    pass
+def backtrack_path(tile_array, end_node):
+    current_node = end_node
+    while current_node.parent_node:
+        tile_array[current_node.y_pos][current_node.x_pos] = T_END
+        current_node = current_node.parent_node
+
+        time.sleep(0.05)
 
 def a_star_search(tile_array, start_tile_pos, end_tile_pos):
     astar_array = init_astar_array(tile_array, end_tile_pos)
 
     end_node = astar_algorithm(astar_array, tile_array, start_tile_pos)
+    
+    backtrack_path(tile_array, end_node)
 
-    return end_node
+"""
+Runs A-Star Pathfinding on a separate thread
+"""
+def run_search(tile_array, start_tile_pos, end_tile_pos):
+    try:
+        _thread.start_new_thread( a_star_search, (tile_array, start_tile_pos, end_tile_pos))
+    except:
+        print ("Error: unable to start thread")
